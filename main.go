@@ -89,6 +89,60 @@ func saveToCSV(data BillingData) {
 	}
 }
 
+func listExpenses(myApp fyne.App, bills []Bill) {
+	expensesTableWindow := myApp.NewWindow("All expenses")
+
+	// Create a table to display bills
+	expensesTable := widget.NewTable(
+		// Define the size of the table based on the bills slice
+		func() (int, int) {
+			return len(bills) + 1, 4 // +1 for header row
+		},
+		// Create each cell (headers in row 0)
+		func() fyne.CanvasObject {
+			return widget.NewLabel("Cell")
+		},
+		// Populate the table
+		func(id widget.TableCellID, cell fyne.CanvasObject) {
+			label := cell.(*widget.Label)
+			if id.Row == 0 { // Header row
+				switch id.Col {
+				case 0:
+					label.SetText("Label")
+				case 1:
+					label.SetText("Price")
+				case 2:
+					label.SetText("Date")
+				case 3:
+					label.SetText("Paid In Credit Card")
+				}
+			} else { // Data rows
+				bill := bills[id.Row-1] // Adjust for header
+				switch id.Col {
+				case 0:
+					label.SetText(bill.Label)
+				case 1:
+					label.SetText(fmt.Sprintf("$%.2f", bill.Price))
+				case 2:
+					label.SetText(bill.Date)
+				case 3:
+					label.SetText(strconv.FormatBool(bill.PaidInCreditCard))
+				}
+			}
+		},
+	)
+
+	// Wrap the table in a scroll container and set a specific height
+	tableScroll := container.NewScroll(expensesTable)
+	tableScroll.SetMinSize(fyne.NewSize(500, 400)) // Width: 500, Height: 300
+
+	content := container.NewVBox(tableScroll)
+
+	expensesTableWindow.SetContent(content)
+	expensesTableWindow.Resize(fyne.NewSize(500, 400))
+	expensesTableWindow.Show()
+}
+
 func main() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Billing Manager")
@@ -135,6 +189,11 @@ func main() {
 		}
 		bills = append(bills, bill)
 
+		// Clear input fields
+		labelEntry.SetText("")
+		priceEntry.SetText("")
+		dateEntry.SetText("")
+
 		// Calculate total expenses and display
 		total := calculateTotal(bills)
 		totalLabel.SetText(fmt.Sprintf("Total: $%.2f", total))
@@ -171,6 +230,11 @@ func main() {
 		saveToCSV(billingData)
 	})
 
+	// Test it
+	listExpensesButton := widget.NewButton("Show Expenses", func() {
+		listExpenses(myApp, bills)
+	})
+
 	// Main layout
 	content := container.NewVBox(
 		widget.NewLabel("Enter Bill Information:"),
@@ -180,6 +244,7 @@ func main() {
 		personNameEntry,
 		salaryEntry,
 		totalLabel,
+		listExpensesButton,
 		saveJSONButton,
 		saveCSVButton,
 	)
