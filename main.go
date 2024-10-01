@@ -89,6 +89,14 @@ func saveToCSV(data BillingData) {
 	}
 }
 
+// Prevent text from overflowing into adjacent cells
+func truncateText(text string, length int) string {
+	if len(text) > length {
+		return text[:length] + "..." // Truncate with ellipsis
+	}
+	return text
+}
+
 func listExpenses(myApp fyne.App, bills []Bill) {
 	expensesTableWindow := myApp.NewWindow("All expenses")
 
@@ -100,7 +108,7 @@ func listExpenses(myApp fyne.App, bills []Bill) {
 		},
 		// Create each cell (headers in row 0)
 		func() fyne.CanvasObject {
-			return widget.NewLabel("Cell")
+			return widget.NewLabel("Paid In Credit Card")
 		},
 		// Populate the table
 		func(id widget.TableCellID, cell fyne.CanvasObject) {
@@ -120,7 +128,7 @@ func listExpenses(myApp fyne.App, bills []Bill) {
 				bill := bills[id.Row-1] // Adjust for header
 				switch id.Col {
 				case 0:
-					label.SetText(bill.Label)
+					label.SetText(truncateText(bill.Label, 15))
 				case 1:
 					label.SetText(fmt.Sprintf("$%.2f", bill.Price))
 				case 2:
@@ -134,12 +142,13 @@ func listExpenses(myApp fyne.App, bills []Bill) {
 
 	// Wrap the table in a scroll container and set a specific height
 	tableScroll := container.NewScroll(expensesTable)
-	tableScroll.SetMinSize(fyne.NewSize(500, 400)) // Width: 500, Height: 300
+	tableScroll.SetMinSize(fyne.NewSize(600, 400)) // Width: 500, Height: 300
 
 	content := container.NewVBox(tableScroll)
 
+	expensesTableWindow.SetFixedSize(true)
 	expensesTableWindow.SetContent(content)
-	expensesTableWindow.Resize(fyne.NewSize(500, 400))
+	expensesTableWindow.Resize(fyne.NewSize(600, 400))
 	expensesTableWindow.Show()
 }
 
