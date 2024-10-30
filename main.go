@@ -98,7 +98,7 @@ func main() {
 	})
 
 	// Test it
-	listExpensesButton := widget.NewButton("Show Expenses", func() {
+	listExpensesButton := widget.NewButton("Show detailed expenses", func() {
 		listExpenses(myApp, bills, salaryEntry)
 	})
 

@@ -118,13 +118,14 @@ func listExpenses(myApp fyne.App, bills []Bill, salaryEntry *widget.Entry) {
 	tableScroll := container.NewScroll(expensesTable)
 	tableScroll.SetMinSize(fyne.NewSize(600, 400)) // Width: 500, Height: 300
 
-	totalExpensesLabel := canvas.NewText(fmt.Sprintf("R$ %.2f of total expenses", calculateTotal(bills)), color.RGBA{137, 43, 226, 50})
+	totalExpensesLabel := canvas.NewText(fmt.Sprintf("R$ %.2f of total expenses", calculateTotal(bills)), color.RGBA{100, 0, 0, 255})
 	totalExpensesLabel.TextStyle = fyne.TextStyle{Bold: true}
 
 	salary, _ := strconv.ParseFloat(salaryEntry.Text, 64)
 	totalAvailable := salary - calculateTotal(bills)
 
-	totalAvailableLabel := canvas.NewText(fmt.Sprintf("R$ %.2f available", totalAvailable), color.RGBA{137, 43, 226, 50})
+	totalAvailableLabel := canvas.NewText(fmt.Sprintf("R$ %.2f available", totalAvailable), color.RGBA{0, 100, 0, 255})
+	totalAvailableLabel.TextStyle = fyne.TextStyle{Bold: true}
 
 	content := container.NewVBox(
 		tableScroll,
