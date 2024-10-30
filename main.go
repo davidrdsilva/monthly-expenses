@@ -99,7 +99,7 @@ func main() {
 
 	// Test it
 	listExpensesButton := widget.NewButton("Show Expenses", func() {
-		listExpenses(myApp, bills)
+		listExpenses(myApp, bills, salaryEntry)
 	})
 
 	// Main layout

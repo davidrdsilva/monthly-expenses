@@ -4,11 +4,13 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"image/color"
 	"log"
 	"os"
 	"strconv"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
@@ -69,7 +71,7 @@ func truncateText(text string, length int) string {
 	return text
 }
 
-func listExpenses(myApp fyne.App, bills []Bill) {
+func listExpenses(myApp fyne.App, bills []Bill, salaryEntry *widget.Entry) {
 	expensesTableWindow := myApp.NewWindow("All expenses")
 
 	// Create a table to display bills
@@ -116,7 +118,19 @@ func listExpenses(myApp fyne.App, bills []Bill) {
 	tableScroll := container.NewScroll(expensesTable)
 	tableScroll.SetMinSize(fyne.NewSize(600, 400)) // Width: 500, Height: 300
 
-	content := container.NewVBox(tableScroll)
+	totalExpensesLabel := canvas.NewText(fmt.Sprintf("R$ %.2f of total expenses", calculateTotal(bills)), color.RGBA{137, 43, 226, 50})
+	totalExpensesLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	salary, _ := strconv.ParseFloat(salaryEntry.Text, 64)
+	totalAvailable := salary - calculateTotal(bills)
+
+	totalAvailableLabel := canvas.NewText(fmt.Sprintf("R$ %.2f available", totalAvailable), color.RGBA{137, 43, 226, 50})
+
+	content := container.NewVBox(
+		tableScroll,
+		totalExpensesLabel,
+		totalAvailableLabel,
+	)
 
 	expensesTableWindow.SetFixedSize(true)
 	expensesTableWindow.SetContent(content)
