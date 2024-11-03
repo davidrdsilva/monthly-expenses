@@ -18,6 +18,8 @@ func main() {
 	myApp := app.NewWithID("billingappv1.0.0")
 	myWindow := myApp.NewWindow("Monthly Expenses Manager")
 
+	billingData := &BillingData{}
+
 	// Create fields for entering bill information
 	labelEntry := widget.NewEntry()
 	labelEntry.SetPlaceHolder("Expense Name")
@@ -71,6 +73,8 @@ func main() {
 		}
 		bills = append(bills, bill)
 
+		billingData.Bills = bills
+
 		// Clear input fields
 		labelEntry.SetText("")
 		priceEntry.SetText("")
@@ -96,7 +100,9 @@ func main() {
 				}
 				// Get the file name from the URI
 				fileName := reader.URI().Name()
-				LoadJSON(fileName)
+				var data, _ = LoadJSON(fileName)
+
+				billingData = &data
 
 				// Display success message
 				successMessageLabel.Hidden = false
@@ -143,8 +149,13 @@ func main() {
 
 	// Test it
 	listExpensesButton := widget.NewButton("Show detailed expenses", func() {
-		title := fmt.Sprintf("%s's expenses | %s", personNameEntry.Text, monthSelect.Selected)
-		listExpenses(myApp, title, bills, salaryEntry)
+		// Set person data
+		billingData.Person.FullName = personNameEntry.Text
+		salary, _ := strconv.ParseFloat(salaryEntry.Text, 64)
+		billingData.Person.Salary = salary
+		billingData.MonthName = monthSelect.Selected
+
+		listExpenses(myApp, billingData)
 	})
 
 	// Main layout

@@ -48,9 +48,6 @@ func LoadJSON(filename string) (BillingData, error) {
 		return data, fmt.Errorf("could not unmarshal JSON: %v", err)
 	}
 
-	// Print loaded data
-	fmt.Printf("Loaded BillingData: %+v\n", data)
-
 	return data, nil
 }
 
@@ -101,14 +98,15 @@ func truncateText(text string, length int) string {
 	return text
 }
 
-func listExpenses(myApp fyne.App, title string, bills []Bill, salaryEntry *widget.Entry) {
+func listExpenses(myApp fyne.App, billingData *BillingData) {
+	title := fmt.Sprintf("%s's expenses | %s", billingData.Person.FullName, billingData.MonthName)
 	expensesTableWindow := myApp.NewWindow(title)
 
 	// Create a table to display bills
 	expensesTable := widget.NewTable(
 		// Define the size of the table based on the bills slice
 		func() (int, int) {
-			return len(bills) + 1, 4 // +1 for header row
+			return len(billingData.Bills) + 1, 4 // +1 for header row
 		},
 		// Create each cell (headers in row 0)
 		func() fyne.CanvasObject {
@@ -129,7 +127,7 @@ func listExpenses(myApp fyne.App, title string, bills []Bill, salaryEntry *widge
 					label.SetText("Paid In Credit Card")
 				}
 			} else { // Data rows
-				bill := bills[id.Row-1] // Adjust for header
+				bill := billingData.Bills[id.Row-1] // Adjust for header
 				switch id.Col {
 				case 0:
 					label.SetText(truncateText(bill.Label, 15))
@@ -148,11 +146,10 @@ func listExpenses(myApp fyne.App, title string, bills []Bill, salaryEntry *widge
 	tableScroll := container.NewScroll(expensesTable)
 	tableScroll.SetMinSize(fyne.NewSize(600, 400)) // Width: 500, Height: 300
 
-	totalExpensesLabel := canvas.NewText(fmt.Sprintf("R$ %.2f of total expenses", calculateTotal(bills)), color.RGBA{100, 0, 0, 255})
+	totalExpensesLabel := canvas.NewText(fmt.Sprintf("R$ %.2f of total expenses", calculateTotal(billingData.Bills)), color.RGBA{100, 0, 0, 255})
 	totalExpensesLabel.TextStyle = fyne.TextStyle{Bold: true}
 
-	salary, _ := strconv.ParseFloat(salaryEntry.Text, 64)
-	totalAvailable := salary - calculateTotal(bills)
+	totalAvailable := billingData.Person.Salary - calculateTotal(billingData.Bills)
 
 	totalAvailableLabel := canvas.NewText(fmt.Sprintf("R$ %.2f available", totalAvailable), color.RGBA{0, 100, 0, 255})
 	totalAvailableLabel.TextStyle = fyne.TextStyle{Bold: true}
