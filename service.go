@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
-	"io/ioutil"
+	"io"
 	"log"
+	"math"
 	"os"
 	"strconv"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -22,6 +24,10 @@ func calculateTotal(bills []Bill) float64 {
 	for _, bill := range bills {
 		total += bill.Price
 	}
+
+	// Round to two decimal places
+	total = math.Round(total*100) / 100
+
 	return total
 }
 
@@ -37,7 +43,7 @@ func LoadJSON(filename string) (BillingData, error) {
 	defer file.Close()
 
 	// Read file contents
-	byteValue, err := ioutil.ReadAll(file)
+	byteValue, err := io.ReadAll(file)
 	if err != nil {
 		return data, fmt.Errorf("could not read file: %v", err)
 	}
@@ -53,7 +59,7 @@ func LoadJSON(filename string) (BillingData, error) {
 
 // Function to save data to JSON
 func saveToJSON(data BillingData) {
-	file, err := os.Create("billing_data.json")
+	file, err := os.Create(fmt.Sprintf("%s_billing_data.json", strings.ToLower(data.Person.FullName)))
 	if err != nil {
 		log.Fatal("Cannot create JSON file:", err)
 	}
@@ -67,7 +73,7 @@ func saveToJSON(data BillingData) {
 
 // Function to save data to CSV
 func saveToCSV(data BillingData) {
-	file, err := os.Create("billing_data.csv")
+	file, err := os.Create(fmt.Sprintf("%s_billing_data.csv", strings.ToLower(data.Person.FullName)))
 	if err != nil {
 		log.Fatal("Cannot create CSV file:", err)
 	}
@@ -132,7 +138,7 @@ func listExpenses(myApp fyne.App, billingData *BillingData) {
 				case 0:
 					label.SetText(truncateText(bill.Label, 15))
 				case 1:
-					label.SetText(fmt.Sprintf("R$%.2f", bill.Price))
+					label.SetText(fmt.Sprintf("R$ %.2f", bill.Price))
 				case 2:
 					label.SetText(bill.Date)
 				case 3:
@@ -146,10 +152,10 @@ func listExpenses(myApp fyne.App, billingData *BillingData) {
 	tableScroll := container.NewScroll(expensesTable)
 	tableScroll.SetMinSize(fyne.NewSize(600, 400)) // Width: 500, Height: 300
 
-	totalExpensesLabel := canvas.NewText(fmt.Sprintf("R$ %.2f of total expenses", calculateTotal(billingData.Bills)), color.RGBA{100, 0, 0, 255})
+	totalExpensesLabel := canvas.NewText(fmt.Sprintf("R$ %.2f of total expenses", billingData.Total), color.RGBA{100, 0, 0, 255})
 	totalExpensesLabel.TextStyle = fyne.TextStyle{Bold: true}
 
-	totalAvailable := billingData.Person.Salary - calculateTotal(billingData.Bills)
+	totalAvailable := billingData.Person.Salary - billingData.Total
 
 	totalAvailableLabel := canvas.NewText(fmt.Sprintf("R$ %.2f available", totalAvailable), color.RGBA{0, 100, 0, 255})
 	totalAvailableLabel.TextStyle = fyne.TextStyle{Bold: true}

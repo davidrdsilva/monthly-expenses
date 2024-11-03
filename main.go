@@ -82,6 +82,9 @@ func main() {
 
 		// Calculate total expenses and display
 		total := calculateTotal(bills)
+
+		// Refresh total value
+		billingData.Total = total
 		totalLabel.SetText(fmt.Sprintf("Total: R$%.2f", total))
 	})
 
@@ -147,13 +150,20 @@ func main() {
 		saveToCSV(billingData)
 	})
 
-	// Test it
+	// List all expenses
 	listExpensesButton := widget.NewButton("Show detailed expenses", func() {
-		// Set person data
-		billingData.Person.FullName = personNameEntry.Text
-		salary, _ := strconv.ParseFloat(salaryEntry.Text, 64)
-		billingData.Person.Salary = salary
-		billingData.MonthName = monthSelect.Selected
+		// Set person data from entries
+		if personNameEntry.Text != "" {
+			billingData.Person.FullName = personNameEntry.Text
+		}
+		if salaryEntry.Text != "" {
+			salary, _ := strconv.ParseFloat(salaryEntry.Text, 64)
+			billingData.Person.Salary = salary
+		}
+		if monthSelect.Selected != "" {
+
+			billingData.MonthName = monthSelect.Selected
+		}
 
 		listExpenses(myApp, billingData)
 	})
