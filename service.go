@@ -71,8 +71,8 @@ func truncateText(text string, length int) string {
 	return text
 }
 
-func listExpenses(myApp fyne.App, bills []Bill, salaryEntry *widget.Entry) {
-	expensesTableWindow := myApp.NewWindow("All expenses")
+func listExpenses(myApp fyne.App, title string, bills []Bill, salaryEntry *widget.Entry) {
+	expensesTableWindow := myApp.NewWindow(title)
 
 	// Create a table to display bills
 	expensesTable := widget.NewTable(
@@ -104,7 +104,7 @@ func listExpenses(myApp fyne.App, bills []Bill, salaryEntry *widget.Entry) {
 				case 0:
 					label.SetText(truncateText(bill.Label, 15))
 				case 1:
-					label.SetText(fmt.Sprintf("$%.2f", bill.Price))
+					label.SetText(fmt.Sprintf("R$%.2f", bill.Price))
 				case 2:
 					label.SetText(bill.Date)
 				case 3:

@@ -30,6 +30,17 @@ func main() {
 	salaryEntry := widget.NewEntry()
 	salaryEntry.SetPlaceHolder("Person Salary")
 
+	// List of months
+	months := []string{
+		"January", "February", "March", "April", "May", "June",
+		"July", "August", "September", "October", "November", "December",
+	}
+
+	// Create a Select widget with the months
+	monthSelect := widget.NewSelect(months, func(selected string) {})
+
+	monthSelect.PlaceHolder = "Select a month"
+
 	// Person data
 	person := Person{}
 
@@ -63,7 +74,7 @@ func main() {
 
 		// Calculate total expenses and display
 		total := calculateTotal(bills)
-		totalLabel.SetText(fmt.Sprintf("Total: $%.2f", total))
+		totalLabel.SetText(fmt.Sprintf("Total: R$%.2f", total))
 	})
 
 	// Save JSON Button
@@ -75,9 +86,10 @@ func main() {
 
 		// Create billing data
 		billingData := BillingData{
-			Person: person,
-			Bills:  bills,
-			Total:  calculateTotal(bills),
+			Person:    person,
+			MonthName: monthSelect.Selected,
+			Bills:     bills,
+			Total:     calculateTotal(bills),
 		}
 		saveToJSON(billingData)
 	})
@@ -90,16 +102,18 @@ func main() {
 
 		// Create billing data
 		billingData := BillingData{
-			Person: person,
-			Bills:  bills,
-			Total:  calculateTotal(bills),
+			Person:    person,
+			MonthName: monthSelect.Selected,
+			Bills:     bills,
+			Total:     calculateTotal(bills),
 		}
 		saveToCSV(billingData)
 	})
 
 	// Test it
 	listExpensesButton := widget.NewButton("Show detailed expenses", func() {
-		listExpenses(myApp, bills, salaryEntry)
+		title := fmt.Sprintf("%s's expenses | %s", personNameEntry.Text, monthSelect.Selected)
+		listExpenses(myApp, title, bills, salaryEntry)
 	})
 
 	// Main layout
@@ -110,6 +124,7 @@ func main() {
 		widget.NewLabel("Enter Person Information:"),
 		personNameEntry,
 		salaryEntry,
+		monthSelect,
 		totalLabel,
 		listExpensesButton,
 		saveJSONButton,
