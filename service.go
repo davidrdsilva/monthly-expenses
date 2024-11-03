@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -22,6 +23,35 @@ func calculateTotal(bills []Bill) float64 {
 		total += bill.Price
 	}
 	return total
+}
+
+// LoadJSON function to load JSON data into BillingData struct
+func LoadJSON(filename string) (BillingData, error) {
+	var data BillingData
+
+	// Open and read the JSON file
+	file, err := os.Open(filename)
+	if err != nil {
+		return data, fmt.Errorf("could not open file: %v", err)
+	}
+	defer file.Close()
+
+	// Read file contents
+	byteValue, err := ioutil.ReadAll(file)
+	if err != nil {
+		return data, fmt.Errorf("could not read file: %v", err)
+	}
+
+	// Unmarshal JSON data into BillingData struct
+	err = json.Unmarshal(byteValue, &data)
+	if err != nil {
+		return data, fmt.Errorf("could not unmarshal JSON: %v", err)
+	}
+
+	// Print loaded data
+	fmt.Printf("Loaded BillingData: %+v\n", data)
+
+	return data, nil
 }
 
 // Function to save data to JSON

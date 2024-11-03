@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 )
 
 func main() {
-	myApp := app.New()
+	myApp := app.NewWithID("billingappv1.0.0")
 	myWindow := myApp.NewWindow("Monthly Expenses Manager")
 
 	// Create fields for entering bill information
@@ -77,6 +81,33 @@ func main() {
 		totalLabel.SetText(fmt.Sprintf("Total: R$%.2f", total))
 	})
 
+	// A label for displaying success messages
+	successMessageLabel := canvas.NewText("", color.RGBA{0, 100, 0, 255})
+	successMessageLabel.TextStyle = fyne.TextStyle{Bold: true}
+	successMessageLabel.Hidden = true
+
+	// Load data from JSON Button
+	loadFromJSONButton := widget.NewButton("Load data from JSON", func() {
+		// Create a file open dialog
+		fileDialog := dialog.NewFileOpen(
+			func(reader fyne.URIReadCloser, err error) {
+				if err != nil || reader == nil {
+					return
+				}
+				// Get the file name from the URI
+				fileName := reader.URI().Name()
+				LoadJSON(fileName)
+
+				// Display success message
+				successMessageLabel.Hidden = false
+				successMessageLabel.Text = fmt.Sprintf("%s was loaded", fileName)
+			}, myWindow)
+
+		// Show only specific file types (optional)
+		fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".json"}))
+		fileDialog.Show()
+	})
+
 	// Save JSON Button
 	saveJSONButton := widget.NewButton("Save to JSON", func() {
 		// Set person data
@@ -126,7 +157,9 @@ func main() {
 		salaryEntry,
 		monthSelect,
 		totalLabel,
+		successMessageLabel,
 		listExpensesButton,
+		loadFromJSONButton,
 		saveJSONButton,
 		saveCSVButton,
 	)
